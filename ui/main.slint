@@ -1,25 +1,27 @@
 // 主窗口与界面入口
 
-export component MainWindow inherits Window {  // 定义一个可以被 Rust 使用的组件，名字为 MainWindow，让其继承一个普通窗口
+export component MainWindow inherits Window {  // 定义并导出一个名为 MainWindow 的窗口组件
     width: 900px;
     height: 600px;
     title: "Reignite Project Management";
+    property <string> app-title: "Reignite";  // 定义标题属性，并设置默认值
+    property <string> app-description: "Manage forgotten projects and bring them back to life.";  // 定义说明属性，并设置默认值
 
-    Rectangle {  // 卡片区域
+    Rectangle {  // 创建一个矩形区域作为窗口背景
         background: #1e1e1e;
 
-        VerticalLayout {
-            padding: 40px;
-            spacing: 12px;
+        VerticalLayout {  // 让内部元素从上到下排列
+            padding: 40px;  // 设置内容与布局边界之间的内边距
+            spacing: 12px;  // 设置相邻元素之间的间距
 
-            Text {  // 显示文字
-                text: "Reignite";
+            Text {
+                text: app-title;  // 将文字绑定到标题属性
                 color: #ffffff;
                 font-size: 32px;
             }
 
             Text {
-                text: "Manage forgotten projects and bring them back to life.";
+                text: app-description;  // 将文字绑定到说明属性
                 color: #aaaaaa;
                 font-size: 16px;
             }
