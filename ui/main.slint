@@ -1,11 +1,14 @@
+import { Button } from "std-widgets.slint";
+
 // 主窗口与界面入口
 
 export component MainWindow inherits Window {  // 定义并导出一个名为 MainWindow 的窗口组件
+    callback revive-clicked();  // 声明一个不带参数的点击回调
     width: 900px;
     height: 600px;
     title: "Reignite Project Management";
-    property <string> app-title: "Reignite";  // 定义标题属性，并设置默认值
-    property <string> app-description: "Manage forgotten projects and bring them back to life.";  // 定义说明属性，并设置默认值
+    in property <string> app-title: "Reignite";  // 定义可由 Rust 设置的标题属性
+    in property <string> app-description: "Manage forgotten projects and bring them back to life.";  // 定义可由 Rust 设置的说明属性
 
     Rectangle {  // 创建一个矩形区域作为窗口背景
         background: #1e1e1e;
@@ -24,6 +27,11 @@ export component MainWindow inherits Window {  // 定义并导出一个名为 Ma
                 text: app-description;  // 将文字绑定到说明属性
                 color: #aaaaaa;
                 font-size: 16px;
+            }
+
+            Button {
+                text: "回调按钮";  // 按钮显示的文字
+                clicked => { root.revive-clicked(); }  // 点击按钮时触发上面的回调
             }
         }
     }
