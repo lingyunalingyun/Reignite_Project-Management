@@ -1,3 +1,4 @@
+mod core;
 slint::include_modules!();  //将 build.rs 中编译的 slint 文件包含进来
 
 fn main() -> Result<(), slint::PlatformError> {
