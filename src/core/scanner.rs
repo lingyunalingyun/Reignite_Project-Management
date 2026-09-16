@@ -5,13 +5,13 @@ use std::path::Path;
 use std::time::SystemTime;
 
 pub struct FileInfo{                               //定义文件和修改时间的结构体
-    path: String,
+    pub path: String,                              //公开文件路径，供界面显示
     modified: SystemTime,
 }
 
 
 
-fn get_modified_time(path:&path)->Option<SystemTime>{                     //获取文件修改时间函数
+fn get_modified_time(path: &Path) -> Option<SystemTime> {                     //获取文件修改时间函数
     let metadata=fs::metadata(path).ok()?;
     metadata.modified().ok()
 }
@@ -59,6 +59,4 @@ pub fn scan_and_sort(dir: &Path) -> Vec<FileInfo> {              //对外公开�
     sort_by_modified(&mut files);
     files
 }
-
-
 
