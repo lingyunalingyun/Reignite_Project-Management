@@ -15,20 +15,20 @@ pub const PROJECT_MARKERS: &[&str] = &[
     "mix.exs",
     "gemfile",
 ];
+// 扫描时需要直接忽略的目录名
+pub const IGNORED_DIRS: &[&str] = &[".git", "target", "node_modules", "venv", "dist", "build"];
 // 额外允许的后缀匹配（小写）
 pub const PROJECT_SUFFIXES: &[&str] = &[".sln"];
 
 pub enum SortMethod {
     ModifiedTimeAsc,    // 修改时间升序
     FileSizeDesc,       // 文件大小降序
-    ModifyCountDesc,    // 修改次数降序
 }
 
 pub struct FileInfo {                               //定义文件和修改时间的结构体
     pub path: String,
     pub modified: SystemTime,
     pub size: u64,
-    pub modify_count: u32,
 }
 
 // 扫描失败的原因分类
@@ -123,7 +123,13 @@ fn scan_dir(dir: &Path, results: &mut Vec<FileInfo>, errors: &mut Vec<FileScanEr
         };
 
         if path.is_dir() {
-                                             // 是文件夹：命中项目标志文件则收集为项目摘要并跳过递归，否则正常递归进入
+                                             // 是文件夹：先跳过忽略目录；命中项目标志文件则收集为项目摘要，否则递归进入
+            if let Some(dir_name) = path.file_name().and_then(|n| n.to_str()) {
+                if IGNORED_DIRS.contains(&dir_name.to_lowercase().as_str()) {
+                    continue;
+                }
+            }
+
             if is_project_dir(&path) {
                 let mut items: Vec<String> = Vec::new();
                 if let Ok(entries_iter) = fs::read_dir(&path) {
@@ -150,7 +156,6 @@ fn scan_dir(dir: &Path, results: &mut Vec<FileInfo>, errors: &mut Vec<FileScanEr
                         path: path.to_string_lossy().to_string(),
                         modified,
                         size,
-                        modify_count: 0,  // 修改次数暂时用0占位
                     });
                 }
                 Err(e) => {
@@ -175,10 +180,6 @@ pub fn sort(files: &mut Vec<FileInfo>, method: &SortMethod) {                  /
         SortMethod::FileSizeDesc => {
             files.sort_by(|a, b| b.size.cmp(&a.size));
         }
-        SortMethod::ModifyCountDesc => {
-            // 修改次数排序暂时按0占位，后续实现
-            files.sort_by(|a, b| b.modify_count.cmp(&a.modify_count));
-        }
     }
 }
 
@@ -190,6 +191,13 @@ pub fn scan(dir: &Path) -> ScanResult {                                         
     let mut projects = Vec::new();
     scan_dir(dir, &mut files, &mut errors, &mut projects);
     ScanResult { files, errors, projects }
+}
+
+pub fn scan_and_sort(dir: &Path, method: Option<SortMethod>) -> ScanResult {            //兼容入口：扫描并按指定方式排序，默认按修改时间升序
+    let mut result = scan(dir);
+    let method = method.unwrap_or(SortMethod::ModifiedTimeAsc);
+    sort(&mut result.files, &method);
+    result
 }
 
 #[cfg(test)]
@@ -211,6 +219,13 @@ mod tests {
         let mut result = scan(cwd);
         sort(&mut result.files, &SortMethod::ModifiedTimeAsc);
         let _ = result.files.len();
+    }
+
+    #[test]
+    fn smoke_scan_and_sort_default() {
+        let cwd = Path::new(".");
+        let result = scan_and_sort(cwd, None);
+        let _default_sorted = result.files.len();
     }
 }
 
