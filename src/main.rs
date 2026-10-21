@@ -14,8 +14,8 @@ fn main() -> Result<(), slint::PlatformError> {
         { // Some 表示用户选择了一个文件夹
             let folder_text = folder.to_string_lossy().to_string(); // 将 PathBuf 转成文字路径
 
-            let files = core::scanner::scan_and_sort(Path::new(&folder_text));
-            let file_names: Vec<SharedString> = files
+            let result = core::scanner::scan_and_sort(Path::new(&folder_text), None);
+            let file_names: Vec<SharedString> = result.files
                 .into_iter()
                 .map(|file| file.path.into())
                 .collect();
