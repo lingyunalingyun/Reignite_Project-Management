@@ -1,28 +1,52 @@
+import { Button, LineEdit, ListView } from "std-widgets.slint";
+
 // 主窗口与界面入口
 
-export component MainWindow inherits Window {  // 定义一个可以被 Rust 使用的组件，名字为 MainWindow，让其继承一个普通窗口
+export component MainWindow inherits Window {  // 定义并导出一个名为 MainWindow 的窗口组件
+    callback select-folder-clicked();  // 声明选择文件夹按钮的回调
     width: 900px;
     height: 600px;
     title: "Reignite Project Management";
+    in property <string> status-text: "等待操作...";  // 定义状态文字属性
+    in-out property <string> target-folder: "";  // 保存目标文件夹路径
+    in property <[string]> scanned-files: [];  // 保存扫描到的文件路径
 
-    Rectangle {  // 卡片区域
+    Rectangle {  // 创建一个矩形区域作为窗口背景
         background: #1e1e1e;
 
-        VerticalLayout {
-            padding: 40px;
-            spacing: 12px;
+        VerticalLayout {  // 让内部元素从上到下排列
+            padding: 40px;  // 设置内容与布局边界之间的内边距
+            spacing: 12px;  // 设置相邻元素之间的间距
 
-            Text {  // 显示文字
-                text: "Reignite";
-                color: #ffffff;
-                font-size: 32px;
+            HorizontalLayout {  // 将输入框和按钮水平排列
+                spacing: 8px;
+
+                LineEdit {
+                    text <=> target-folder;
+                    placeholder-text: "目标文件夹路径";
+                    width: 600px;
+                }
+
+                Button {
+                    text: "选择文件夹";
+                    clicked => { root.select-folder-clicked(); }
+                }
             }
 
             Text {
-                text: "Manage forgotten projects and bring them back to life.";
-                color: #aaaaaa;
+                text: status-text;  // 将文字绑定到状态属性
+                color: #66cc99;
                 font-size: 16px;
             }
+
+            ListView {
+                for file in scanned-files: Text {
+                    text: file;
+                    color: #dddddd;
+                    font-size: 14px;
+                }
+            }
+
         }
     }
 
